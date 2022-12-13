@@ -4,29 +4,24 @@ from functools import cmp_to_key
 from math import  prod
 
 
-#a<b -1
-#a==b 0
-#a>b  1
-def compareInt(a,b, pre):
-    print(pre, "Compare", a,b)
+def compareInt(a,b):
     if(a==b):
         return 0 
     return 1 if a>b else -1
-def compare(a,b, pre = ""):
-    print(pre, "Compare", a,b)
+def compare(a,b):
     i = 0
     while i<len(a) and i<len(b):
         x = a[i]
         y = b[i]
         comp = 0
         if(isinstance(x,int) and isinstance(y, int)):
-            comp = compareInt(x,y, pre)
+            comp = compareInt(x,y)
         else:
             if(isinstance(x, int)):
                 x = [x]
             if(isinstance(y, int)):
                 y = [y]
-            comp = compare(x,y, pre+"  ")
+            comp = compare(x,y)
         if comp!=0:
             return comp
         i = i+1
@@ -34,10 +29,8 @@ def compare(a,b, pre = ""):
     if i==len(a) and i == len(b):
         return 0            
     elif(i==len(a)):
-        print("left side is smaller")
         return -1
     else:
-        print("right side is smaller")
         return 1
     
 
