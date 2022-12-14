@@ -31,22 +31,11 @@ def drop():
     return True
 
 def printa():
-    print("")
-    minX = len(mat)
-    maxX = 0
-
-    minY = len(mat[0])
-    maxY = 0
-
-    for j in range(len(mat[0])-1):
-        for i in range(len(mat)):
-            if mat[i][j]!='.':
-                minX = min (minX, i)
-                maxX = max (maxX, i)
-
-
-                minY = min (minY, j)                
-                maxY = max (maxY, j)
+    poi = [[i,j] for i,k in enumerate(mat) for j,v in enumerate(k[:-1]) if v!='.' ]
+    maxX = max(poi, key= lambda y: y[0])[0] 
+    maxY = max(poi, key= lambda y: y[1])[1]
+    minX = min(poi, key= lambda y: y[0])[0]
+    minY = min(poi, key= lambda y: y[1])[1]
     for j in range(minY, maxY+1):
         for i in range(minX, maxX+1):
             print(mat[i][j], end="")
@@ -59,8 +48,6 @@ maxY = max([max(k, key= lambda y: y[1])[1] for k in lines])
 mat = []
 for i in range(2000):
     mat.append(['.']*(maxY+3))
-
-printa()
 
 for line in lines:
     src = line[0]
