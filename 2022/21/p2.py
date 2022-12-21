@@ -1,30 +1,43 @@
 import sys
 
 class Monkey:
+    operator = {
+        "+": lambda x,y: x+y,
+        "-": lambda x,y: x-y,
+        "*": lambda x,y: x*y,
+        "/": lambda x,y: x/y,
+    }
+
+    operatorA = {
+        "+": lambda x,y: x-y,
+        "-": lambda x,y: y-x,
+        "*": lambda x,y: x/y,
+        "/": lambda x,y: y/x,
+        "=": lambda x,y: y
+    }
+
+    operatorB = {
+        "+": lambda x,y: x-y,
+        "-": lambda x,y: x+y,
+        "*": lambda x,y: x/y,
+        "/": lambda x,y: x*y,
+        "=": lambda x,y: y
+    }
     def __init__(self,exp):
         split = exp.strip().split(" ") 
+        self.a = self.op = self.b = None
+        self.value = None
         if len(split)==1:
-            self.a, self.op, self.b = None, None, None
             self.value = int(exp)
         else:
             self.a, self.op, self.b = split
-            self.value = None
     def solve(self, monkeys):
-        if not self.value:
-            a = monkeys[self.a].solve(monkeys)
-            b = monkeys[self.b].solve(monkeys)
-            op = self.op
+        if self.value:
+            return self.value
 
-            if op == '+':
-                self.value = a+b
-            elif op == '-':
-                self.value = a-b
-            elif op == '*':
-                self.value = a*b
-            elif op == '/':
-                self.value = a/b
-            else:
-                raise RuntimeError("WHAT" + str(op))
+        a = monkeys[self.a].solve(monkeys)
+        b = monkeys[self.b].solve(monkeys)
+        self.value = Monkey.operator[self.op](a,b)
         return self.value
     def solveP2(self, monkeys, expected):
         if self.value:
@@ -33,49 +46,17 @@ class Monkey:
             self.value = expected
             return expected
         try:
-            selected = 1 
+            operator = Monkey.operatorA
+            other = self.b
             result = monkeys[self.a].solve(monkeys)
         except:
-            selected = 2
-            result = monkeys[self.b].solve(monkeys)
-        op = self.op
-
-        if(selected == 1):
-            if op == '+':
-                newExpected = expected - result
-            elif op == '-':
-                newExpected = result - expected
-            elif op == '*':
-                newExpected = expected/result
-            elif op == '/':
-                newExpected = result/expected
-            else:
-                raise RuntimeError("WHAT" + str(op))
-            ans = monkeys[self.b].solveP2(monkeys, newExpected)
-        else:
-            if op == '+':
-                newExpected = expected - result
-            elif op == '-':
-                newExpected = result + expected
-            elif op == '*':
-                newExpected = expected/result
-            elif op == '/':
-                newExpected = expected*result
-            else:
-                raise RuntimeError("WHAT" + str(op))
-            ans = monkeys[self.a].solveP2(monkeys, newExpected)
-
-        return ans
-    def root(self, monkeys):
-        try:
-            selected = 1 
-            result = monkeys[self.a].solve(monkeys)
-        except:
-            selected = 2
+            operator = Monkey.operatorB
+            other = self.a
             result = monkeys[self.b].solve(monkeys)
 
-        other = self.b if selected == 1 else self.a
-        return monkeys[other].solveP2(monkeys, result)
+        expected = operator[self.op](expected,result)
+        
+        return monkeys[other].solveP2(monkeys, expected)
 
 monkeys = {}
 for l in sys.stdin:
@@ -83,10 +64,5 @@ for l in sys.stdin:
     monkeys[id]=Monkey(exp)
 
 monkeys['humn'].value = None
-print(monkeys["root"].root(monkeys))
-
-'''
-for id in monkeys:
-    m = monkeys[id]
-    print(id, m.a, m.op, m.b, m.value)
-'''
+monkeys["root"].op = "="
+print(monkeys["root"].solveP2(monkeys,0))
