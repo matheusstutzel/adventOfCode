@@ -1,0 +1,5 @@
+=> at the end 
+=> @for @@input:split("\n")  as line
+=> expand line:regex("(?<a>[0-9]+)-(?<b>[0-9]+),(?<c>[0-9]+)-(?<d>[0-9]+)")
+=> ((a# as s,b# as e),(c#,d#))|>intervals(s,e):len==1? 1,0 as counts
+=> counts:sum

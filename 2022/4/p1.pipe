@@ -1,0 +1,20 @@
+=> at the end 
+=> @for @@input:split("\n")  as line
+=> expand line:regex("(?<a>[0-9]+)-(?<b>[0-9]+),(?<c>[0-9]+)-(?<d>[0-9]+)")
+=> expand *:amap(_#)
+=> expand ((b-a)>(d-c)? (c as a, d as b, a as c, b as d), (a,b,c,d)) --make sure (a,b)<(c,d)
+=> (a>=c and b<=d)? 1,0 as counts
+=> counts:sum
+
+
+
+
+---------Other solution--------------
+
+=> at the end 
+=> @for @@input:split("\n")  as line
+=> expand line:regex("(?<a>[0-9]+)-(?<b>[0-9]+),(?<c>[0-9]+)-(?<d>[0-9]+)")
+=> ((a# as s,b# as e),(c#,d#)) as p
+=> @set p|>intervals(s,e) as intervals 
+=> intervals:len !=1? 0, (p|> intervals[0]->begin==s and intervals[0]->end==e|>:any)?1,0 as counts
+=>  counts:sum
