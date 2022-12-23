@@ -14,57 +14,51 @@ def printa():
     print("________")
     for i in range(minX, maxX+1):
         for j in range(minY, maxY+1):
-            c = elves[(i,j)] if (i,j) in elves else '.'
+            c = '#' if (i,j) in elves else '.'
             print(c, end='')
         print("")
     print("________")
     return (maxX-minX+1)*(maxY-minY+1) - len(elves)
 
 
-elves = dict()
+elves = set()
 
 for i,l in enumerate(sys.stdin):
     for j,v in enumerate(l):
         if(v=='#'):
-            elves[(i,j)]= chr(len(elves)+ ord('A'))
+            elves.add((i,j))
 printa()
 
 checks = [
-    lambda x,y: (x-1, y) if( (x-1,y-1) not in elves and (x-1,y) not in elves and (x-1,y+1) not in elves) else (x,y), #north
-    lambda x,y: (x+1, y) if( (x+1,y-1) not in elves and (x+1,y) not in elves and (x+1,y+1) not in elves) else (x,y), #south
-    lambda x,y: (x, y-1) if( (x-1,y-1) not in elves and (x,y-1) not in elves and (x+1,y-1) not in elves) else (x,y), #west
-    lambda x,y: (x, y+1) if( (x-1,y+1) not in elves and (x,y+1) not in elves and (x+1,y+1) not in elves) else (x,y)  #east
+    lambda x,y: (x-1, y) if( (x-1,y-1) not in elves and (x-1,y) not in elves and (x-1,y+1) not in elves) else None, #north
+    lambda x,y: (x+1, y) if( (x+1,y-1) not in elves and (x+1,y) not in elves and (x+1,y+1) not in elves) else None, #south
+    lambda x,y: (x, y-1) if( (x-1,y-1) not in elves and (x,y-1) not in elves and (x+1,y-1) not in elves) else None, #west
+    lambda x,y: (x, y+1) if( (x-1,y+1) not in elves and (x,y+1) not in elves and (x+1,y+1) not in elves) else None,  #east
+    lambda x,y: any([ (i,j)!=(0,0) and (x+i,y+j) in elves for i in range(-1,2) for j in range(-1,2)]) # is there any elve around?
 ]
 
 check = 0
 for i in range(10):
-    newElves = defaultdict(list)
+    newElves = defaultdict(set)
     for e in elves:
-        movs = []
+        if(not checks[4](*e)):
+            newElves[e].add(e)
+            continue
         for k in range(4):
             mov = checks[(check+k)%4](*e)
-            if(mov != e):
-                movs.append(mov)
-        if(len(movs)==4 or len(movs)==0):
-            #print("using none", e)
-            newElves[e].append(e)
+            if mov:
+                newElves[mov].add(e)
+                break
         else:
-            newElves[movs[0]].append(e)
-    aux = dict()
+            newElves[e].add(e)
+    aux = set()
     for ne, v in newElves.items():
         if(len(v)==1):
-            aux[ne]=elves[v[0]]
+            aux.add(ne)
         else:
-            for k in v:
-                aux[k]=elves[k]
-    if(len(aux)!=len(elves)):
-        print(aux,"\n", elves)
-        raise RuntimeError(":/")
-
-    elves = aux #not sure if we need this set()
-    print(i+1)
-    printa()
-    check= (check+1)%4
+            aux = aux | v
+    elves = aux
+    check= check+1
         
 result = printa()
-print(result)
+print(result, check)
