@@ -1,0 +1,10 @@
+def value(a):
+  a>'a'? a:ord-'a':ord+1,
+  a:ord-'A':ord+27;
+
+=> at the end 
+=> @for @@input:split("\n")  as line
+=> line:split|>:value:set as v
+=> set(v) as entry every 3 items
+=> entry[0]|> @filter(entry[1]:contains(_) and entry[2]:contains(_))|>:sum as value
+=> value:sum

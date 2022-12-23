@@ -1,0 +1,18 @@
+def @@input: "PAST YOUR INPUT HERE";
+
+def value(a):
+  a>'a'? a:ord-'a':ord+1,
+  a:ord-'A':ord+27;
+
+=> at the end 
+=> @for @@input:split("\n")  as line
+=> @set line:len as len
+=> line:substring(0,len//2) as c, line:substring(len//2) as v
+/* 
+apply transformation(_$:split|>_:value:set) for each field (expand *:amap) 
+transformation is spliting string into char seq, then converting in value and adding to a set
+*/
+=> expand *:amap(_$:split|>_:value:set)  
+=> v:retain(c):get(0) as value
+--=> v|> map(_, sum( c:contains(_)?1,0)):itermap()|> @filter(value == 1)|> key |> :sum as value
+=> value:sum
