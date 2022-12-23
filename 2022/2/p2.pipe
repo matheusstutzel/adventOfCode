@@ -1,0 +1,17 @@
+def @@input: "PAST YOUR INPUT HERE";
+
+def modulo(x,y):
+  --https://pipes.intelie.com/docs/0.25.2/#operator-mod
+  --Returns the rest of the division of one number by another.
+  ((x%y)+y)%y;
+
+def evaluate(line):
+  def @@e: line[0]$ord - 'A':ord;
+  def @@m: line[1]$ord - 'X':ord;
+  ((0,3,6)[@@m]+ ((@@m-1+@@e):modulo(3)+1) as result, @@e as e ,@@m as m);
+
+=> at the end 
+=> @for @@input:split("\n")  as line
+=> line:split(" ") as line
+=> @set expand evaluate(line)
+=> result:sum

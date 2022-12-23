@@ -1,0 +1,3 @@
+def @@input: "PAST YOUR INPUT HERE";
+
+=> @@input:split("\n\n")|> (_:split("\n")|>_#:sum) |> @top( 3, _ desc)|>_#sum as result at the end  

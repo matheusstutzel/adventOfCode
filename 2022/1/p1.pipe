@@ -1,0 +1,3 @@
+def @@input: "PAST YOUR INPUT HERE";
+
+=> @@input:split("\n\n")|> (_:split("\n")|>_#:sum) |> max(_) as result at the end  
