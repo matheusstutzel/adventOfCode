@@ -46,7 +46,7 @@ def tick(blizzard):
             n[moveBlizzard(*k,*m)].append(m)
     return n
 
-def bfs(start, target, blizzard): #graph, value, targets
+def bfs(start, target, blizzard):
     q = deque([start]) #queue
     round = 0
     while q:
@@ -58,7 +58,6 @@ def bfs(start, target, blizzard): #graph, value, targets
                 return round
             for u in movements(p):
                 va = valid(*u, blizzard)
-                #print("testando ",p,u,va)
                 if va and u not in s:
                     s.add(u)
                     q.append(u)
