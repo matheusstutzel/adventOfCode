@@ -10,23 +10,17 @@ move 1 from 1 to 2";
 
 def convert(s):
   s:itermap()|>map(key,value:seq);
-  
-def apply(s,m):
-  loop(m->count#, m->from#, m->to#, s)|>:convert;
 
-def loop(c, f, t, s):
-(0,c,f,t,s):unfold( fun(j,c,f,t,s):innerLoop(j,c,f,t,s));
- 
-def innerLoop(j, c,f,t,s):
-  def @@should:j<c;
-  def @@r: (s:map + newmap(t,  (s[f][0],):seq+ (s[t]:seq) ) + newmap(f, s[f]:seq:skip(1))):convert;
-  @@should? (@@r, (j+1,c,f,t, @@r)), null;
+def process(s,c,m):
+  def @@rep: m[c][0]; 
+  def @@from:m[c][1];
+  def @@to:m[c][2];
+  --newmap(4, (c$,@@rep, @@from,@@to):seq);
+  (s,0, @@rep, @@from, @@to):unfold(fun (s,c,m,f,t): c>=m?null, (calc(s,c,f,t), (calc(s,c,f,t), c+1, m,f,t)))|>:last;
 
-
-def process(i, s):
-  def @@should: i<len(mov);
-  def @@r:  @@should?apply(s,(mov:seq)[i]), null;
-  @@should?( @@r,(i+1, @@r)), null;
+def calc (s,c,f,t):
+  --newmap(4, (""+f$,""+t$):seq);
+  (s:map + newmap(t,  (s[f][0],):seq+ (s[t]:seq) ) + newmap(f, s[f]:seq:skip(1))):convert;
 
 => at the end 
 => @for @@input:split("\n")  as line
@@ -34,16 +28,10 @@ def process(i, s):
 => set(line) as part every (readingCrane)
 => @set count():overall() == 1? "crane","movement" as group
 => map(group, part) as m
-=> m + newmap("crane", m["crane"]|>@filter(_:contains("["))|>:list)
-=> @yield 
+=> m + newmap("crane", m["crane"]|>@filter(_:contains("["))|>:list) as m
+=> m["crane"] as crane, m["movement"] as movement
+
 => @set (crane|>_$|> (:len:range|>((^_)[_] as a, _//4+1 as b)|>@filter(a>='A' and a<='Z')))|>@chain|>map(b, list(a)) as state
-=>@set  movement:seq|> _$regex("move (?<count>[0-9]+) from (?<from>[0-9]+) to (?<to>[0-9]+)")|>list(_) as mov
-=> @set (0,state):unfold(fun(a,b): process(a,b))|>last(_) as p, apply(state, (mov:seq)[0]):convert:apply((mov:seq)[1])
---=> p[len(p)-1]:itermap()|>map(key,value:seq)
-
-
-
---+ newmap(move->to, s[move->to]+s[move->from][0]) 
---+ newmap(move->from, s[move->from]:skip(1)
-
-            
+=> @set  movement:seq|> _$regex("move (?<count>[0-9]+) from (?<from>[0-9]+) to (?<to>[0-9]+)")|>_->(count# as c, from# as f, to# as t) as mov
+=> @set (state, 0, mov):unfold(fun(s,c,m): c>=len(m)? null, (process(s,c,m), (process(s,c,m), c+1,mov)))|>:last as r
+=> @set range(len(r))|>r:get(_#+1):seq:take(1)|>@chain|>:summary("") as response
