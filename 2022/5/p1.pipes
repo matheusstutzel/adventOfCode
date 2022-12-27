@@ -11,16 +11,24 @@ move 1 from 1 to 2";
 def convert(s):
   s:itermap()|>map(key,value:seq);
 
+def innerProcess(s,c,m,f,t):
+  def @@cal: calc(s,c,f,t);
+  c>=m? null, (@@cal, (@@cal, c+1,m,f,t));
+
 def process(s,c,m):
-  def @@rep: m[c][0]; 
-  def @@from:m[c][1];
-  def @@to:m[c][2];
+  def @@rep: m[c][0]#; 
+  def @@from:m[c][1]#;
+  def @@to:m[c][2]#;
   --newmap(4, (c$,@@rep, @@from,@@to):seq);
-  (s,0, @@rep, @@from, @@to):unfold(fun (s,c,m,f,t): c>=m?null, (calc(s,c,f,t), (calc(s,c,f,t), c+1, m,f,t)))|>:last;
+  (s,0, @@rep, @@from, @@to):unfold(fun (s,c,m,f,t): innerProcess(s,c,m,f,t))|>:last;
+
+def outerProcess(s,c,m):
+  def @@p: process(s,c,m);
+  c>=len(m)? null, (@@p, (@@p, c+1,mov));
 
 def calc (s,c,f,t):
   --newmap(4, (""+f$,""+t$):seq);
-  (s:map + newmap(t,  (s[f][0],):seq+ (s[t]:seq) ) + newmap(f, s[f]:seq:skip(1))):convert;
+  (s:map + newmap(t,  s[f][0]+ (s[t]) ) + newmap(f, s[f]:substring(1)));
 
 => at the end 
 => @for @@input:split("\n")  as line
@@ -28,10 +36,14 @@ def calc (s,c,f,t):
 => set(line) as part every (readingCrane)
 => @set count():overall() == 1? "crane","movement" as group
 => map(group, part) as m
-=> m + newmap("crane", m["crane"]|>@filter(_:contains("["))|>:list) as m
-=> m["crane"] as crane, m["movement"] as movement
+=> m["crane"]|>@filter(_:contains("[")) as crane,
+   m["movement"] as movement
 
-=> @set (crane|>_$|> (:len:range|>((^_)[_] as a, _//4+1 as b)|>@filter(a>='A' and a<='Z')))|>@chain|>map(b, list(a)) as state
-=> @set  movement:seq|> _$regex("move (?<count>[0-9]+) from (?<from>[0-9]+) to (?<to>[0-9]+)")|>_->(count# as c, from# as f, to# as t) as mov
-=> @set (state, 0, mov):unfold(fun(s,c,m): c>=len(m)? null, (process(s,c,m), (process(s,c,m), c+1,mov)))|>:last as r
-=> @set range(len(r))|>r:get(_#+1):seq:take(1)|>@chain|>:summary("") as response
+-- parsing input
+=> @set (crane|>_$|> (:len:range|>((^_)[_] as a, _//4+1 as b)|>@filter(a>='A' and a<='Z')))|>@chain|>map(b, a:summary(""))as state
+=> @set movement:seq|> _$regex("move (?<c>[0-9]+) from (?<f>[0-9]+) to (?<t>[0-9]+)") as mov
+
+--executing movements
+=> @set (state, 0, mov):unfold(fun(s,c,m): outerProcess(s,c,m)) as r
+--extracting response
+=> @set r|>:last:itermap|> value[0]:summary("") as response
