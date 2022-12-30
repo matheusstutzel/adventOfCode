@@ -1,0 +1,14 @@
+def @@input:"<input>";
+
+def @@size: 14;
+def process(line, message):
+  range(message, line:len)|>(_ as i, line:substring(_-message,_):split as chars);
+
+=>at the end 
+=>@for  @@input:split("\n") as input
+=>@unbatch
+=>@for process(input,@@size) as i
+=> @yield
+=>(chars|>:set):len == @@size as a, i, chars every item 
+=>@filter a
+=>firstv(i) every batch

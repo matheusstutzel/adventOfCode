@@ -10,4 +10,4 @@ def solve(l,messageSize):
 
 # reading input
 for line in sys.stdin:
-        print(solve(line,3))
+        print(solve(line,4))
