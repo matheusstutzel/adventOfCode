@@ -1,5 +1,5 @@
 import sys
-from collections import deque
+import heapq as hq
 
 dir = {
     '#':[],
@@ -26,31 +26,36 @@ def neighbors(g,x,y):
             continue
         yield (a,b)
 
-def bfs(g,v,t): #graph, value, targets
+
+def dfs(g,v,t): #graph, value, targets
+    dist = {v:0}
     s = {(str(v))} #seen
-    q = deque([[v]]) #queue
-    d = 0
+    q = [] #heap
+    hq.heappush(q,(1,[v]))
     mp = []
     while q:
-        path = q.popleft()
+        size,path = hq.heappop(q)
+        print(len(q), size, len(s))
         p = path[-1]
-        if p == t and len(path)>d:
-            d = len(path)
+        if p in dist and size<dist[p]:
+            continue
+        dist[p]=size
+        if p == t and size>dist[t]:
             mp = path
             continue
         for u in neighbors(g,*p):
-            if len(path)>1 and u == path[-2]:
+            if u in path:
                 continue
             npath = "".join([str(x) for x in path]) + str(u)
             if npath not in s:
                 s.add(npath)
-                q.append(path+[u])
-    return d,mp
+                hq.heappush(q, (size+1,path+[u]))
+    return dist[t],mp
 
 
 mat = [[*l.strip()] for l in sys.stdin]
 
-d, mp= bfs(mat, (0,1), (len(mat)-1, len(mat)-2))
+d, mp= dfs(mat, (0,1), (len(mat)-1, len(mat)-2))
 
 print(d-1)
 
@@ -61,8 +66,4 @@ for i,l in enumerate(mat):
             c = 'O'
         print(c, end="")
     print("")
-
-real    0m40,955s
-user    0m40,129s
-sys     0m0,823s
 '''
